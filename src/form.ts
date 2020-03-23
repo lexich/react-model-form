@@ -32,7 +32,10 @@ export const field = (opts: {
       Reflect.metadata(FORM_TYPE_FIELD, opts?.type)(target, propertyKey);
     }
     if (opts.validation) {
-      Reflect.metadata(FORM_VALIDATION_NAME, opts?.validation)(target, propertyKey);
+      Reflect.metadata(FORM_VALIDATION_NAME, opts?.validation)(
+        target,
+        propertyKey
+      );
     }
     if (opts.title) {
       Reflect.metadata(FORM_TITLE_FIELD, opts?.title)(target, propertyKey);
@@ -44,8 +47,11 @@ export const field = (opts: {
   };
 };
 
-function getInputName(form: any, path: string, sep = '.') {
-  const list = path.split('.');
+function getInputName(
+  form: any,
+  list: string[],
+  sep = '.'
+) {
   const result: string[] = [];
   for (let i = 0, iLen = list.length, field = form; i < iLen; i++) {
     const proto = Object.getPrototypeOf(field);
@@ -68,67 +74,102 @@ function getInputName(form: any, path: string, sep = '.') {
   return result.join(sep);
 }
 
-function getComponentType<TResolver>(form: any, path: string): TResolver | undefined {
-  return getProtoProps(FORM_TYPE_FIELD, form, path);
-}
-
-function getValidation<T>(form: any, path: string): TValidation<T> | undefined {
-  return getProtoProps(FORM_VALIDATION_NAME, form, path);
-}
-
-function getTitle(form: any, path: string): string | undefined {
-  return getProtoProps(FORM_TITLE_FIELD, form, path);
-}
-
-function getProto(form: any, path: string, list = path.split('.')) {
-  const formIndex = list.length - 2;
-  const formPath = formIndex >= 0 ? list.slice(formIndex) : undefined;
-  const model = formPath !== undefined ? get(form, formPath) : form;
+function getProto(model: any, pathForm: string | undefined, pathProp: string | undefined) {
+  if (pathForm !== undefined) {
+    const field = get(model, pathForm);
+    if (field instanceof SForm) {
+      return Object.getPrototypeOf(field);
+    }
+  }
   return Object.getPrototypeOf(model);
 }
 
-function getProtoProps(PROP: string, form: any, path: string, list = path.split('.')) {
-  const proto = getProto(form, path, list);
-  return Reflect.getMetadata(
-    PROP,
-    proto,
-    list[list.length - 1]
-  );
+function getProtoProps(
+  PROP: string,
+  form: any,
+  pathForm: string | undefined,
+  pathProp: string | undefined
+) {
+  const proto = getProto(form, pathForm, pathProp);
+  const propName = pathProp ?? pathForm
+  return Reflect.getMetadata(PROP, proto, propName || '');
+}
+
+function getTitle(
+  form: any,
+  pathForm: string | undefined,
+  pathProp: string | undefined
+): string | undefined {
+  return getProtoProps(FORM_TITLE_FIELD, form, pathForm, pathProp);
+}
+
+function getComponentType<TResolver>(
+  form: any,
+  pathForm: string | undefined,
+  pathProp: string | undefined
+): TResolver | undefined {
+  return getProtoProps(FORM_TYPE_FIELD, form, pathForm, pathProp);
+}
+
+function getValidation<T>(
+  form: any,
+  pathForm: string | undefined,
+  pathProp: string | undefined
+): TValidation<T> | undefined {
+  return getProtoProps(FORM_VALIDATION_NAME, form, pathForm, pathProp);
 }
 
 function createRenderer$<TForm extends SForm, TResolver>(
   meta: IMetaProps<TForm, TResolver>,
-  path: string | undefined
+  pathForm: string | undefined,
+  pathProp: string | undefined
 ): any {
   const handler = {
     get(target: any, method: string) {
       if (has(target, method)) {
         return get(target, method);
       }
-      const forwardName = path ? `${path}.${method}` : method;
-      return createRenderer$<TForm, TResolver>(meta, forwardName);
+      const path = pathProp ? (
+        pathForm ? `${pathForm}.${pathProp}` : pathProp
+      ) : pathForm;
+
+      const newPathForm = path ?? method;
+      const newPathProp = path ? method : undefined;
+      return createRenderer$<TForm, TResolver>(meta, newPathForm, newPathProp);
     }
   };
-  if (path === undefined) {
+  if (pathForm === undefined) {
     return new Proxy({}, handler);
   }
-
+  const pathAccessor: string[] = [];
+  if (pathForm) {
+    pathAccessor.push(pathForm);
+    if (pathProp) {
+      pathAccessor.push(pathProp);
+    }
+  }
 
   const renderer: TReact<any, any> = {
     render(model: FormModel<any>) {
-      const value = get(model.form, path);
-      const isTouched = get(model.touched, path) as any;
-      const name = getInputName(model.form, path);
-      const validation = isTouched ? getValidation<any>(model.form, path) : undefined;
+      const value = get(model.form, pathAccessor);
+      const isTouched = get(model.touched, pathAccessor) as any;
+      const name = getInputName(model.form, pathAccessor);
+      const validation = isTouched
+        ? getValidation<any>(model.form, pathForm, pathProp)
+        : undefined;
       const error = isTouched ? validation?.(value) : undefined;
-      const resolverType = getComponentType<TResolver>(model.form, path)
+      const resolverType = getComponentType<TResolver>(
+        model.form,
+        pathForm,
+        pathProp
+      );
       const Component = meta.resolveComponent(resolverType);
-      const title = getTitle(model.form, path);
+      const title = getTitle(model.form, pathForm, pathProp);
       return React.createElement(Component, {
         model,
         title,
         name,
-        path,
+        path: pathAccessor.join('.'),
         value,
         meta,
         error,
@@ -155,5 +196,5 @@ export function createTouched<T extends SForm>(
 export function createRenderer<T extends SForm, TResolver>(
   props: IMetaProps<T, TResolver>
 ): Renderers<T> {
-  return createRenderer$<T, TResolver>(props, undefined);
+  return createRenderer$<T, TResolver>(props, undefined, undefined);
 }

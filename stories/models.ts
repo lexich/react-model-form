@@ -8,22 +8,22 @@ export enum ERenderer {
 }
 
 export class MoneyForm extends SForm {
-  @field({ type: ERenderer.number, title: 'Money' })
+  @field({ type: ERenderer.number, title: '*Money' })
   @observable
   money = 100;
 
-  @field({ type: ERenderer.string, title: 'Currency' })
+  @field({ type: ERenderer.string, title: '*Currency' })
   @observable
   currency = '$'
 }
 
 export class UserForm extends SForm {
-  @field({ type: ERenderer.string, title: 'Name' })
+  @field({ type: ERenderer.string, title: '*Name' })
   @observable
-  name = '';
+  name = 'Lexich';
 
   @field({
-    title: 'Age',
+    title: '*Age',
     type: ERenderer.number,
     validation(val: number) {
       if (val <= 0) {
@@ -36,7 +36,7 @@ export class UserForm extends SForm {
   age = 0;
 
   @observable
-  @field({ type: ERenderer.bool, title: 'Are you user?' })
+  @field({ type: ERenderer.bool, title: '*Are you user?' })
   isUser = true;
 
   purchase = new MoneyForm();

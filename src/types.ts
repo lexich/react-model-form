@@ -34,17 +34,6 @@ export class FormModel<
   }
 }
 
-export function createPartialTouched<TForm, TField>(
-  model: FormModel<TForm>
-): ClassFlags<TField, keyof TField, boolean> {
-  return new Proxy<ClassFlags<TField, keyof TField, boolean>>(
-    model.touched as any,
-    {
-      get(target: any, key: string) {}
-    }
-  );
-}
-
 export type RemoveTNull<Type, TNull = undefined> = {
   [Key in keyof Type]: TNull extends Type[Key] ? never : Key;
 }[keyof Type];
