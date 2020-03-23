@@ -4,7 +4,8 @@ import {
   Renderers,
   ClassFlags,
   IMetaProps,
-  TValidation
+  TValidation,
+  FormModel
 } from './types';
 import React from 'react';
 import get from 'lodash/get';
@@ -114,17 +115,17 @@ function createRenderer$<TForm extends SForm, TResolver>(
 
 
   const renderer: TReact<any, any> = {
-    render(form: any) {
-      const value = get(form, path);
-      const isTouched = get(meta.touched, path);
-      const name = getInputName(form, path);
-      const validation = isTouched ? getValidation<any>(form, path) : undefined;
+    render(model: FormModel<any>) {
+      const value = get(model.form, path);
+      const isTouched = get(model.touched, path) as any;
+      const name = getInputName(model.form, path);
+      const validation = isTouched ? getValidation<any>(model.form, path) : undefined;
       const error = isTouched ? validation?.(value) : undefined;
-      const resolverType = getComponentType<TResolver>(form, path)
+      const resolverType = getComponentType<TResolver>(model.form, path)
       const Component = meta.resolveComponent(resolverType);
-      const title = getTitle(form, path);
+      const title = getTitle(model.form, path);
       return React.createElement(Component, {
-        form,
+        model,
         title,
         name,
         path,

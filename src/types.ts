@@ -5,6 +5,10 @@ export abstract class SForm {
   [formSymbol]() {}
 }
 
+export class FormModel<TForm> {
+  constructor(public form: TForm, public touched: ClassFlags<TForm, keyof TForm, boolean>) {}
+}
+
 export type RemoveTNull<Type, TNull = undefined> = {
   [Key in keyof Type]: TNull extends Type[Key] ? never : Key;
 }[keyof Type];
@@ -18,7 +22,6 @@ export type TWrapForm<T> = Record<string, T>;
 
 export interface IMetaProps<T, TResolver> {
   set(target: any, key: string, value: any): void;
-  touched: ClassFlags<T, keyof T, boolean>;
   resolveComponent(type?: TResolver): FunctionComponent<IProps<any, any>>
 }
 
@@ -41,7 +44,7 @@ type TypeFilterRenderer<
 export type TValidation<T> = (val: T) => string | undefined;
 
 export interface IProps<TValue, TForm> {
-  form: TForm;
+  model: FormModel<TForm>;
   value: TValue;
   name: string;
   path: string;
@@ -53,7 +56,7 @@ export interface IProps<TValue, TForm> {
 }
 
 export type TReact<T, TForm> = {
-  render(form: TForm): ReactNode;
+  render(form: FormModel<TForm>): ReactNode;
 };
 
 export type Renderers<
