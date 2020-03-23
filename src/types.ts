@@ -1,12 +1,48 @@
-import { ReactNode, FunctionComponent } from "react";
+import { ReactNode, FunctionComponent } from 'react';
 import 'reflect-metadata';
+import get from 'lodash/get';
+import set from 'lodash/set';
 export const formSymbol = Symbol('TFORM');
 export abstract class SForm {
   [formSymbol]() {}
 }
 
-export class FormModel<TForm> {
-  constructor(public form: TForm, public touched: ClassFlags<TForm, keyof TForm, boolean>) {}
+type SFormKeys<T> = RemoveTNullProperties<
+  {
+    [P in keyof T]: T[P] extends SForm ? T[P] : undefined;
+  }
+>;
+
+export class FormModel<
+  TForm,
+  TTouched = ClassFlags<TForm, keyof TForm, boolean>
+> {
+  constructor(public form: TForm, public touched: TTouched) {}
+  partial<TField extends keyof SFormKeys<TForm>>(
+    field: TField
+  ): FormModel<TForm[typeof field]> {
+    const model = this.form[field];
+    const touched = new Proxy<any>(this.touched, {
+      get(target, key) {
+        return get(target, [field, key])
+      },
+      set(target, key, value) {
+        return set(target, [field, key], value);
+      }
+    });
+    return new FormModel(model, touched as any);
+  }
+}
+
+export function createPartialTouched<TForm, TField>(
+  model: FormModel<TForm>
+): ClassFlags<TField, keyof TField, boolean> {
+  return new Proxy<ClassFlags<TField, keyof TField, boolean>>(
+    model.touched as any,
+    {
+      get(target: any, key: string) {}
+    }
+  );
 }
 
 export type RemoveTNull<Type, TNull = undefined> = {
@@ -22,13 +58,13 @@ export type TWrapForm<T> = Record<string, T>;
 
 export interface IMetaProps<T, TResolver> {
   set(target: any, key: string, value: any): void;
-  resolveComponent(type?: TResolver): FunctionComponent<IProps<any, any>>
+  resolveComponent(type?: TResolver): FunctionComponent<IProps<any, any>>;
 }
 
 type TypeFilterRenderer<
   TTypeLongName,
   TOrigin,
-  TLeftType = TTypeLongName,
+  TLeftType = TTypeLongName
 > = TTypeLongName extends string
   ? TLeftType
   : TTypeLongName extends boolean
@@ -62,7 +98,7 @@ export type TReact<T, TForm> = {
 export type Renderers<
   T extends any,
   TOrigin = T,
-  TKeys extends any = keyof T,
+  TKeys extends any = keyof T
 > = RemoveTNullProperties<
   {
     [P in TKeys]: TypeFilterRenderer<T[P], TOrigin, TReact<T[P], TOrigin>>;
@@ -91,9 +127,7 @@ export type ClassFlags<
   TKeys extends any = keyof T,
   TDefType = boolean
 > = {
-  [P in TKeys]: Partial<TypeFilter<
-    T[P],
-    TDefType,
-    ClassFlags<T[P], keyof T[P], TDefType>
-  >>;
+  [P in TKeys]: Partial<
+    TypeFilter<T[P], TDefType, ClassFlags<T[P], keyof T[P], TDefType>>
+  >;
 };

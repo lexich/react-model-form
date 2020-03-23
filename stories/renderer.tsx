@@ -6,7 +6,7 @@ import 'antd/dist/antd.css';
 
 import { IProps, createRenderer } from '../src';
 
-import { UserForm, ERenderer } from './models';
+import { UserForm, MoneyForm, ERenderer } from './models';
 
 const InputComponentData: FunctionComponent<IProps<any, UserForm>> = ({
   model,
@@ -58,18 +58,26 @@ const InputComponentData: FunctionComponent<IProps<any, UserForm>> = ({
   }
 };
 
-const InputComponent: FunctionComponent<IProps<any, UserForm>> = (props) => {
+const InputComponent: FunctionComponent<IProps<any, UserForm>> = props => {
   return (
-    <Form.Item label={props.title || props.name} help={props.error}>
+    <Form.Item
+      label={props.title || props.name}
+      help={props.error}
+      style={{
+        backgroundColor: props.isTouched ? '#ddd' : 'auto'
+      }}
+    >
       <InputComponentData {...props} />
     </Form.Item>
   );
-}
+};
 
-
-export default createRenderer<UserForm, ERenderer>({
+const opts = {
   set,
   resolveComponent() {
     return InputComponent;
   }
-});
+};
+
+export const userRenderer = createRenderer<UserForm, ERenderer>(opts);
+export const moneyRenderer = createRenderer<MoneyForm, ERenderer>(opts);

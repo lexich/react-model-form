@@ -3,7 +3,7 @@ import { Welcome } from '@storybook/react/demo';
 import { observer } from 'mobx-react-lite';
 import { Form } from 'antd';
 import createForm from './models';
-import R from './renderer';
+import { moneyRenderer, userRenderer } from './renderer';
 
 export default {
   title: 'Welcome',
@@ -13,10 +13,11 @@ export default {
 const TestComponent = observer<{ model: ReturnType<typeof createForm> }>(({ model }) => {
   return (
     <Form>
-      {R.age.render(model)}
-      {R.isUser.render(model)}
-      {R.name.render(model)}
-      {R.purchase.money.render(model)}
+      {userRenderer.age.render(model)}
+      {userRenderer.isUser.render(model)}
+      {userRenderer.name.render(model)}
+      {userRenderer.purchase.money.render(model)}
+      {moneyRenderer.currency.render(model.partial('purchase'))}
     </Form>
   );
 });

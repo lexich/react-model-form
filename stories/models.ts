@@ -11,6 +11,10 @@ export class MoneyForm extends SForm {
   @field({ type: ERenderer.number, title: 'Money' })
   @observable
   money = 100;
+
+  @field({ type: ERenderer.string, title: 'Currency' })
+  @observable
+  currency = '$'
 }
 
 export class UserForm extends SForm {
