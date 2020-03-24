@@ -11,47 +11,24 @@ import React from 'react';
 import get from 'lodash/get';
 import has from 'lodash/has';
 import 'reflect-metadata';
+import { $Path, getProtoProps } from './helpers';
 
-const FORM_INPUT_NAME = 'formname';
-const FORM_VALIDATION_NAME = 'formvalidation';
-const FORM_TYPE_FIELD = 'fieldtype';
-const FORM_TITLE_FIELD = 'fieldtitle';
+const FIELD_PROP = 'fieldprop';
 
-export const field = (opts: {
-  name?: string;
-  validation?: TValidation<any>;
-  type?: any;
-  title?: string;
-}) => {
-  function wrap(target: Function, key?: any): void;
-  function wrap(target: Object, propertyKey: string | symbol): void {
-    if (opts.name) {
-      Reflect.metadata(FORM_INPUT_NAME, opts.name)(target, propertyKey);
-    }
-    if (opts.type) {
-      Reflect.metadata(FORM_TYPE_FIELD, opts?.type)(target, propertyKey);
-    }
-    if (opts.validation) {
-      Reflect.metadata(FORM_VALIDATION_NAME, opts?.validation)(
-        target,
-        propertyKey
-      );
-    }
-    if (opts.title) {
-      Reflect.metadata(FORM_TITLE_FIELD, opts?.title)(target, propertyKey);
-    }
-  }
-  return wrap as {
-    (target: Function): void;
-    (target: Object, propertyKey: string | symbol): void;
-  };
-};
+export interface IFieldProps {
+  name: string;
+  validation: TValidation<any>;
+  type: any;
+  title: string;
+}
 
-function getInputName(
-  form: any,
-  list: string[],
-  sep = '.'
-) {
+export const field = (opts: Partial<IFieldProps>) =>
+  Reflect.metadata(FIELD_PROP, opts.name);
+
+function getField = (proto: any) => Reflect.getMetadata(FIELD_PROP, proto);
+
+
+function getInputName(form: any, list: string[], sep = '.') {
   const result: string[] = [];
   for (let i = 0, iLen = list.length, field = form; i < iLen; i++) {
     const proto = Object.getPrototypeOf(field);
@@ -74,50 +51,19 @@ function getInputName(
   return result.join(sep);
 }
 
-function getProto(model: any, pathForm: string | undefined, pathProp: string | undefined) {
-  if (pathForm !== undefined) {
-    const field = get(model, pathForm);
-    if (field instanceof SForm) {
-      return Object.getPrototypeOf(field);
-    }
-  }
-  return Object.getPrototypeOf(model);
-}
+const getTitle = (form: any, path: $Path<'path'>): string | undefined =>
+  getProtoProps(FORM_TITLE_FIELD, form, path);
 
-function getProtoProps(
-  PROP: string,
+const getComponentType = <TResolver>(
   form: any,
-  pathForm: string | undefined,
-  pathProp: string | undefined
-) {
-  const proto = getProto(form, pathForm, pathProp);
-  const propName = pathProp ?? pathForm
-  return Reflect.getMetadata(PROP, proto, propName || '');
-}
+  path: $Path<'path'>
+): TResolver | undefined => getProtoProps(FORM_TYPE_FIELD, form, path);
 
-function getTitle(
+const getValidation = <T>(
   form: any,
-  pathForm: string | undefined,
-  pathProp: string | undefined
-): string | undefined {
-  return getProtoProps(FORM_TITLE_FIELD, form, pathForm, pathProp);
-}
-
-function getComponentType<TResolver>(
-  form: any,
-  pathForm: string | undefined,
-  pathProp: string | undefined
-): TResolver | undefined {
-  return getProtoProps(FORM_TYPE_FIELD, form, pathForm, pathProp);
-}
-
-function getValidation<T>(
-  form: any,
-  pathForm: string | undefined,
-  pathProp: string | undefined
-): TValidation<T> | undefined {
-  return getProtoProps(FORM_VALIDATION_NAME, form, pathForm, pathProp);
-}
+  path: $Path<'path'>
+): TValidation<T> | undefined =>
+  getProtoProps(FORM_VALIDATION_NAME, form, path);
 
 function createRenderer$<TForm extends SForm, TResolver>(
   meta: IMetaProps<TForm, TResolver>,
@@ -129,9 +75,11 @@ function createRenderer$<TForm extends SForm, TResolver>(
       if (has(target, method)) {
         return get(target, method);
       }
-      const path = pathProp ? (
-        pathForm ? `${pathForm}.${pathProp}` : pathProp
-      ) : pathForm;
+      const path = pathProp
+        ? pathForm
+          ? `${pathForm}.${pathProp}`
+          : pathProp
+        : pathForm;
 
       const newPathForm = path ?? method;
       const newPathProp = path ? method : undefined;
