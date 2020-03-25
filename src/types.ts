@@ -1,38 +1,16 @@
 import { ReactNode, FunctionComponent } from 'react';
 import 'reflect-metadata';
-import get from 'lodash/get';
-import set from 'lodash/set';
+import { FormModel } from './formModel';
 export const formSymbol = Symbol('TFORM');
 export abstract class SForm {
   [formSymbol]() {}
 }
 
-type SFormKeys<T> = RemoveTNullProperties<
+export type SFormKeys<T> = RemoveTNullProperties<
   {
     [P in keyof T]: T[P] extends SForm ? T[P] : undefined;
   }
 >;
-
-export class FormModel<
-  TForm,
-  TTouched = ClassFlags<TForm, keyof TForm, boolean>
-> {
-  constructor(public form: TForm, public touched: TTouched) {}
-  partial<TField extends keyof SFormKeys<TForm>>(
-    field: TField
-  ): FormModel<TForm[typeof field]> {
-    const model = this.form[field];
-    const touched = new Proxy<any>(this.touched, {
-      get(target, key) {
-        return get(target, [field, key])
-      },
-      set(target, key, value) {
-        return set(target, [field, key], value);
-      }
-    });
-    return new FormModel(model, touched as any);
-  }
-}
 
 export type RemoveTNull<Type, TNull = undefined> = {
   [Key in keyof Type]: TNull extends Type[Key] ? never : Key;

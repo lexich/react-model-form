@@ -10,17 +10,19 @@ export default {
   component: Welcome
 };
 
-const TestComponent = observer<{ model: ReturnType<typeof createForm> }>(({ model }) => {
-  return (
-    <Form>
-      {userRenderer.purchase.money.render(model)}
-      {userRenderer.isUser.render(model)}
-      {userRenderer.age.render(model)}
-      {userRenderer.name.render(model)}
-      {moneyRenderer.currency.render(model.partial('purchase'))}
-    </Form>
-  );
-});
+const TestComponent = observer<{ model: ReturnType<typeof createForm> }>(
+  ({ model }) => {
+    return (
+      <Form>
+        {userRenderer.purchase.money.render(model)}
+        {userRenderer.isUser.render(model)}
+        {userRenderer.age.render(model)}
+        {userRenderer.name.render(model)}
+        {moneyRenderer.currency.render(model.partial('purchase'))}
+      </Form>
+    );
+  }
+);
 
 export const ToStorybook = () => {
   const form = createForm();

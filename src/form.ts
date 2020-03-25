@@ -1,81 +1,17 @@
+import React from 'react';
 import {
   SForm,
   TReact,
   Renderers,
   ClassFlags,
   IMetaProps,
-  TValidation,
-  FormModel
 } from './types';
-import React from 'react';
+import { FormModel } from './formModel';
 import get from 'lodash/get';
 import has from 'lodash/has';
-import 'reflect-metadata';
-
-const FIELD_PROP = 'fieldprop';
-
-export interface IFieldProps {
-  name: string;
-  validation: TValidation<any>;
-  type: any;
-  title: string;
-}
-
-export const field = (opts: Partial<IFieldProps>) =>
-  Reflect.metadata(FIELD_PROP, opts);
-
-abstract class $Proto {}
-
-abstract class $ProtoForm {}
-
-const getProtoForm = (proto: $Proto): $ProtoForm => (proto as any).constructor;
-const getSubProto = (proto: $Proto, propName: string): $Proto | undefined => {
-  const nextProto = (proto as any)[propName];
-  if (nextProto instanceof SForm) {
-    return nextProto;
-  }
-  return undefined;
-}
-
-function getProto<T extends SForm>(model: FormModel<T>, realPath: string[]): $Proto | undefined {
-  const realFormPath = realPath.length <= 1 ? [] : realPath.slice(0, realPath.length - 1);
-  if (!realFormPath.length) {
-    return model.form as any;
-  }
-  return get(model.form, realFormPath);
-}
-
-const getMetadataField = (
-  proto: $Proto,
-  propName: string
-): Partial<IFieldProps> | undefined =>
-  Reflect.getMetadata(FIELD_PROP, proto as any, propName);
-
-const getMetadataForm = (proto: $ProtoForm): Partial<IFieldProps> | undefined =>
-  Reflect.getMetadata(FIELD_PROP, proto as any);
-
-const getInputName$ = (proto: $Proto, realPath: string[], i = 0): string[] => {
-  const protoForm = getProtoForm(proto);
-  const formMeta = getMetadataForm(protoForm);
-  if (realPath.length === 0) {
-    return [formMeta?.name || ''];
-  }
-  const propsName = realPath[i];
-  const fieldMeta = getMetadataField(proto, propsName);
-
-  const nextProto = getSubProto(proto, propsName);
-
-  const result = [formMeta?.name || '', fieldMeta?.name || propsName];
-  if (!nextProto) {
-    return result
-  } else {
-    const tailResult = getInputName$(nextProto, realPath, i + 1);
-    return result.concat(tailResult);
-  }
-};
-
-const getInputName = (proto: $Proto, realPath: string[]) =>
-  getInputName$(proto, realPath).filter(p => p).join('.')
+import { getProto } from './proto';
+import { getMetadataField } from './meta';
+import { getInputName, join } from './helpers';
 
 function createRenderer$<TForm extends SForm, TResolver>(
   meta: IMetaProps<TForm, TResolver>,
@@ -95,12 +31,11 @@ function createRenderer$<TForm extends SForm, TResolver>(
   }
   const propName = realPath[realPath.length - 1];
   const renderer: TReact<any, any> = {
-    render(model: FormModel<any>) {
+    render(model: FormModel<SForm>) {
       const value = get(model.form, realPath);
-      const isTouched = get(model.touched, realPath) as any;
-      const name = getInputName(model.form, realPath);
+      const isTouched = !!get(model.touched, realPath);
+      const name = join([model.parentFormName, getInputName(model.form, realPath)]);
       const proto = getProto(model, realPath);
-
       const metaInfo = proto ? getMetadataField(proto, propName) : undefined;
       const error = isTouched ? metaInfo?.validation?.(value) : undefined;
       const resolverType = metaInfo?.type;
