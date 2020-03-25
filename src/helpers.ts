@@ -3,9 +3,12 @@ import { getMetadataForm, getMetadataField } from './meta';
 
 const getInputName$ = <T extends $Proto>(proto: T, realPath: string[], parentFormName: string, i = 0): string[] => {
   const protoForm = getProtoForm(proto);
-  const formMeta = parentFormName ? undefined : getMetadataForm(protoForm);
+
+  // get form name only for top item
+  const formName = (i === 0 && !parentFormName ? getMetadataForm(protoForm)?.name : '') || '';
+
   if (realPath.length === 0) {
-    return [formMeta?.name || ''];
+    return [formName];
   }
   const propsName = realPath[i];
   const fieldMeta = getMetadataField(proto, propsName);
@@ -13,8 +16,8 @@ const getInputName$ = <T extends $Proto>(proto: T, realPath: string[], parentFor
   const nextProto = getSubProto(proto, propsName);
 
   const result = [
-    i === 0 ? parentFormName : '',
-    formMeta?.name || '',
+    parentFormName,
+    formName,
     fieldMeta?.name || propsName
   ];
   if (!nextProto) {
