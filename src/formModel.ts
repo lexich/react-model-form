@@ -1,7 +1,7 @@
 import get from 'lodash/get';
 import set from 'lodash/set';
 import { ClassFlags, SFormKeys } from './types';
-import { getInputName, join } from './helpers';
+import { getInputName } from './helpers';
 
 export class FormModel<
   TForm,
@@ -10,7 +10,7 @@ export class FormModel<
   constructor(
     public form: TForm,
     public touched: TTouched,
-    public parentFormName: string = '',
+    public parentFormName = '',
   ) {}
   partial<TField extends keyof SFormKeys<TForm>>(
     field: TField
@@ -24,7 +24,7 @@ export class FormModel<
         return set(target, [field, key], value);
       }
     });
-    const formName = getInputName(this.form, [field as string]);
-    return new FormModel(model, touched as any, join([this.parentFormName, formName]));
+    const formName = getInputName(this.form, [field as string], this.parentFormName);
+    return new FormModel(model, touched as any, formName);
   }
 }

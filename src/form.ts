@@ -11,7 +11,7 @@ import get from 'lodash/get';
 import has from 'lodash/has';
 import { getProto } from './proto';
 import { getMetadataField } from './meta';
-import { getInputName, join } from './helpers';
+import { getInputName } from './helpers';
 
 function createRenderer$<TForm extends SForm, TResolver>(
   meta: IMetaProps<TForm, TResolver>,
@@ -34,7 +34,7 @@ function createRenderer$<TForm extends SForm, TResolver>(
     render(model: FormModel<SForm>) {
       const value = get(model.form, realPath);
       const isTouched = !!get(model.touched, realPath);
-      const name = join([model.parentFormName, getInputName(model.form, realPath)]);
+      const name = getInputName(model.form, realPath, model.parentFormName);
       const proto = getProto(model, realPath);
       const metaInfo = proto ? getMetadataField(proto, propName) : undefined;
       const error = isTouched ? metaInfo?.validation?.(value) : undefined;

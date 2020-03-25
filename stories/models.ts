@@ -7,6 +7,7 @@ export enum ERenderer {
   number
 }
 
+@field({ name: 'money' })
 export class MoneyForm extends SForm {
   @field({ type: ERenderer.number, title: '*Money' })
   @observable
