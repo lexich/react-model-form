@@ -11,7 +11,6 @@ import React from 'react';
 import get from 'lodash/get';
 import has from 'lodash/has';
 import 'reflect-metadata';
-import { $Path, getProtoProps } from './helpers';
 
 const FIELD_PROP = 'fieldprop';
 
@@ -23,101 +22,95 @@ export interface IFieldProps {
 }
 
 export const field = (opts: Partial<IFieldProps>) =>
-  Reflect.metadata(FIELD_PROP, opts.name);
+  Reflect.metadata(FIELD_PROP, opts);
 
-function getField = (proto: any) => Reflect.getMetadata(FIELD_PROP, proto);
+abstract class $Proto {}
 
+abstract class $ProtoForm {}
 
-function getInputName(form: any, list: string[], sep = '.') {
-  const result: string[] = [];
-  for (let i = 0, iLen = list.length, field = form; i < iLen; i++) {
-    const proto = Object.getPrototypeOf(field);
-    const name = list[i];
-    const formName: string | undefined = Reflect.getMetadata(
-      FORM_INPUT_NAME,
-      proto.constructor
-    );
-    if (formName) {
-      result.push(formName);
-    }
-    const propName: string | undefined = Reflect.getMetadata(
-      FORM_INPUT_NAME,
-      proto,
-      name
-    );
-    result.push(propName ?? name);
-    field = field[name];
+const getProtoForm = (proto: $Proto): $ProtoForm => (proto as any).constructor;
+const getSubProto = (proto: $Proto, propName: string): $Proto | undefined => {
+  const nextProto = (proto as any)[propName];
+  if (nextProto instanceof SForm) {
+    return nextProto;
   }
-  return result.join(sep);
+  return undefined;
 }
 
-const getTitle = (form: any, path: $Path<'path'>): string | undefined =>
-  getProtoProps(FORM_TITLE_FIELD, form, path);
+function getProto<T extends SForm>(model: FormModel<T>, realPath: string[]): $Proto | undefined {
+  const realFormPath = realPath.length <= 1 ? [] : realPath.slice(0, realPath.length - 1);
+  if (!realFormPath.length) {
+    return model.form as any;
+  }
+  return get(model.form, realFormPath);
+}
 
-const getComponentType = <TResolver>(
-  form: any,
-  path: $Path<'path'>
-): TResolver | undefined => getProtoProps(FORM_TYPE_FIELD, form, path);
+const getMetadataField = (
+  proto: $Proto,
+  propName: string
+): Partial<IFieldProps> | undefined =>
+  Reflect.getMetadata(FIELD_PROP, proto as any, propName);
 
-const getValidation = <T>(
-  form: any,
-  path: $Path<'path'>
-): TValidation<T> | undefined =>
-  getProtoProps(FORM_VALIDATION_NAME, form, path);
+const getMetadataForm = (proto: $ProtoForm): Partial<IFieldProps> | undefined =>
+  Reflect.getMetadata(FIELD_PROP, proto as any);
+
+const getInputName$ = (proto: $Proto, realPath: string[], i = 0): string[] => {
+  const protoForm = getProtoForm(proto);
+  const formMeta = getMetadataForm(protoForm);
+  if (realPath.length === 0) {
+    return [formMeta?.name || ''];
+  }
+  const propsName = realPath[i];
+  const fieldMeta = getMetadataField(proto, propsName);
+
+  const nextProto = getSubProto(proto, propsName);
+
+  const result = [formMeta?.name || '', fieldMeta?.name || propsName];
+  if (!nextProto) {
+    return result
+  } else {
+    const tailResult = getInputName$(nextProto, realPath, i + 1);
+    return result.concat(tailResult);
+  }
+};
+
+const getInputName = (proto: $Proto, realPath: string[]) =>
+  getInputName$(proto, realPath).filter(p => p).join('.')
 
 function createRenderer$<TForm extends SForm, TResolver>(
   meta: IMetaProps<TForm, TResolver>,
-  pathForm: string | undefined,
-  pathProp: string | undefined
+  realPath: string[]
 ): any {
   const handler = {
     get(target: any, method: string) {
       if (has(target, method)) {
         return get(target, method);
       }
-      const path = pathProp
-        ? pathForm
-          ? `${pathForm}.${pathProp}`
-          : pathProp
-        : pathForm;
-
-      const newPathForm = path ?? method;
-      const newPathProp = path ? method : undefined;
-      return createRenderer$<TForm, TResolver>(meta, newPathForm, newPathProp);
+      const newRealPath = realPath.concat(method);
+      return createRenderer$<TForm, TResolver>(meta, newRealPath);
     }
   };
-  if (pathForm === undefined) {
+  if (!realPath) {
     return new Proxy({}, handler);
   }
-  const pathAccessor: string[] = [];
-  if (pathForm) {
-    pathAccessor.push(pathForm);
-    if (pathProp) {
-      pathAccessor.push(pathProp);
-    }
-  }
-
+  const propName = realPath[realPath.length - 1];
   const renderer: TReact<any, any> = {
     render(model: FormModel<any>) {
-      const value = get(model.form, pathAccessor);
-      const isTouched = get(model.touched, pathAccessor) as any;
-      const name = getInputName(model.form, pathAccessor);
-      const validation = isTouched
-        ? getValidation<any>(model.form, pathForm, pathProp)
-        : undefined;
-      const error = isTouched ? validation?.(value) : undefined;
-      const resolverType = getComponentType<TResolver>(
-        model.form,
-        pathForm,
-        pathProp
-      );
+      const value = get(model.form, realPath);
+      const isTouched = get(model.touched, realPath) as any;
+      const name = getInputName(model.form, realPath);
+      const proto = getProto(model, realPath);
+
+      const metaInfo = proto ? getMetadataField(proto, propName) : undefined;
+      const error = isTouched ? metaInfo?.validation?.(value) : undefined;
+      const resolverType = metaInfo?.type;
       const Component = meta.resolveComponent(resolverType);
-      const title = getTitle(model.form, pathForm, pathProp);
+      const title = metaInfo?.title;
       return React.createElement(Component, {
         model,
         title,
         name,
-        path: pathAccessor.join('.'),
+        path: realPath.join('.'),
         value,
         meta,
         error,
@@ -144,5 +137,5 @@ export function createTouched<T extends SForm>(
 export function createRenderer<T extends SForm, TResolver>(
   props: IMetaProps<T, TResolver>
 ): Renderers<T> {
-  return createRenderer$<T, TResolver>(props, undefined, undefined);
+  return createRenderer$<T, TResolver>(props, []);
 }

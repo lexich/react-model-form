@@ -17,6 +17,7 @@ export class MoneyForm extends SForm {
   currency = '$'
 }
 
+@field({ name: 'form' })
 export class UserForm extends SForm {
   @field({ type: ERenderer.string, title: '*Name' })
   @observable
