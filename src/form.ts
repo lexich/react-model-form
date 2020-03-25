@@ -2,7 +2,6 @@ import React from 'react';
 import { SForm, TReact, Renderers, ClassFlags, IMetaProps } from './types';
 import { FormModel } from './formModel';
 import get from 'lodash/get';
-import has from 'lodash/has';
 import { getProto } from './proto';
 import { getMetadataField } from './meta';
 import { getInputName } from './helpers';
