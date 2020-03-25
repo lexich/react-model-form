@@ -4,14 +4,15 @@ import React from 'react';
 import { set } from 'lodash';
 import 'antd/dist/antd.css';
 
-import { IProps, createRenderer } from '../src';
+import meta, { ERenderer, IFormInputProps } from './meta';
+import { IProps, reconsiler } from '../src';
 
-import { UserForm, MoneyForm, ERenderer } from './models';
+import { UserForm, MoneyForm } from './models';
 
-const InputComponentData: FunctionComponent<IProps<any, UserForm>> = ({
+const InputComponentData: FunctionComponent<IProps<any, UserForm, IFormInputProps>> = ({
   model,
   value,
-  meta,
+  options,
   name,
   path,
   type
@@ -25,7 +26,7 @@ const InputComponentData: FunctionComponent<IProps<any, UserForm>> = ({
           checked={!!value}
           name={name}
           onChange={e => {
-            meta.set(model.form, path, e.target.checked);
+            options.set(model.form, path, e.target.checked);
           }}
         />
       );
@@ -37,10 +38,10 @@ const InputComponentData: FunctionComponent<IProps<any, UserForm>> = ({
           value={value}
           name={name}
           onChange={value => {
-            meta.set(model.form, path, value);
+            options.set(model.form, path, value);
           }}
-          onFocus={() => meta.set(model.touched, path, false)}
-          onBlur={() => meta.set(model.touched, path, true)}
+          onFocus={() => options.set(model.touched, path, false)}
+          onBlur={() => options.set(model.touched, path, true)}
         />
       );
     case ERenderer.string:
@@ -50,18 +51,22 @@ const InputComponentData: FunctionComponent<IProps<any, UserForm>> = ({
           key={name}
           value={value}
           name={name}
-          onChange={(e: any) => meta.set(model.form, path, e.target.value)}
-          onFocus={() => meta.set(model.touched, path, false)}
-          onBlur={() => meta.set(model.touched, path, true)}
+          onChange={(e: any) => options.set(model.form, path, e.target.value)}
+          onFocus={() => options.set(model.touched, path, false)}
+          onBlur={() => options.set(model.touched, path, true)}
         />
       );
   }
 };
 
-const InputComponent: FunctionComponent<IProps<any, UserForm>> = props => {
+const InputComponent: FunctionComponent<IProps<
+  any,
+  UserForm,
+  IFormInputProps
+>> = props => {
   return (
     <Form.Item
-      label={props.title || props.name}
+      label={props.meta.title || props.name}
       help={props.error}
       style={{
         backgroundColor: props.isTouched ? '#ddd' : 'auto'
@@ -72,12 +77,25 @@ const InputComponent: FunctionComponent<IProps<any, UserForm>> = props => {
   );
 };
 
-const opts = {
-  set,
-  resolveComponent() {
-    return InputComponent;
+const resolveComponent = (ttype?: ERenderer, _meta?: IFormInputProps) => {
+  if (!ttype) {
+    return null;
   }
+  return InputComponent;
 };
 
-export const userRenderer = createRenderer<UserForm, ERenderer>(opts);
-export const moneyRenderer = createRenderer<MoneyForm, ERenderer>(opts);
+export const userRenderer = meta.createRender<UserForm>(
+  props => reconsiler<UserForm, ERenderer, IFormInputProps>(props),
+  {
+    set,
+    resolveComponent
+  }
+);
+
+export const moneyRenderer = meta.createRender<MoneyForm>(
+  props => reconsiler<MoneyForm, ERenderer, IFormInputProps>(props),
+  {
+    set,
+    resolveComponent
+  }
+);

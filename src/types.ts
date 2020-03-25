@@ -23,9 +23,9 @@ export type RemoveTNullProperties<Type, TNull = undefined> = {
 export type TWrapID<T> = T;
 export type TWrapForm<T> = Record<string, T>;
 
-export interface IMetaProps<T, TResolver> {
+export interface IMetaProps<TType, TMeta> {
   set(target: any, key: string[], value: any): void;
-  resolveComponent(type?: TResolver): FunctionComponent<IProps<any, any>>;
+  resolveComponent(type?: TType, meta?: TMeta): FunctionComponent<IProps<any, any, TMeta>> | null;
 }
 
 type TypeFilterRenderer<
@@ -46,16 +46,16 @@ type TypeFilterRenderer<
 
 export type TValidation<T> = (val: T) => string | undefined;
 
-export interface IProps<TValue, TForm> {
+export interface IProps<TValue, TForm, TMeta> {
   model: FormModel<TForm>;
   value: TValue;
   name: string;
   path: string[];
-  meta: IMetaProps<TForm, any>;
   type: any;
-  title?: string;
   isTouched: boolean | undefined;
   error: string | undefined;
+  meta: TMeta;
+  options: IMetaProps<TForm, any>;
 }
 
 export type TReact<T, TForm> = {

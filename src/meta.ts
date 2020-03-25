@@ -1,18 +1,19 @@
 import 'reflect-metadata';
-import { TValidation } from './types';
+import {
+  TValidation,
+  RemoveTNullProperties,
+  IMetaProps,
+  Renderers
+} from './types';
 import { $Proto, $ProtoForm } from './proto';
 
 const FIELD_PROP = 'fieldprop';
 
 export interface IFieldProps {
   name: string;
-  validation: TValidation<any>;
   type: any;
-  title: string;
+  validation: TValidation<any>;
 }
-
-export const field = (opts: Partial<IFieldProps>) =>
-  Reflect.metadata(FIELD_PROP, opts);
 
 export const getMetadataField = (
   proto: $Proto,
@@ -20,5 +21,38 @@ export const getMetadataField = (
 ): Partial<IFieldProps> | undefined =>
   Reflect.getMetadata(FIELD_PROP, proto as any, propName);
 
-export const getMetadataForm = (proto: $ProtoForm): Partial<IFieldProps> | undefined =>
+export const getMetadataForm = (
+  proto: $ProtoForm
+): Partial<IFieldProps> | undefined =>
   Reflect.getMetadata(FIELD_PROP, proto as any);
+
+type TFunc<TInterface> = (
+  opts: Partial<IFieldProps> & TInterface
+) => {
+  (target: Function): void;
+  (target: Object, propertyKey: string | symbol): void;
+};
+
+export type TWrap<TType, TInterface, TSchema> = RemoveTNullProperties<
+  {
+    [K in keyof TSchema]: TSchema[K] extends TType
+      ? TFunc<TInterface>
+      : undefined;
+  }
+>;
+
+export class Factory<TType, TInterface> {
+  create<TSchema>(schema: TSchema): TWrap<TType, TInterface, TSchema> {
+    return Object.keys(schema).reduce((memo, key) => {
+      memo[key] = (opts: any) =>
+        Reflect.metadata(FIELD_PROP, { ...opts, type: (schema as any)[key] });
+      return memo;
+    }, {} as any);
+  }
+  createRender<T>(
+    reconsiler: (props: IMetaProps<TType, TInterface>) => Renderers<T>,
+    props: IMetaProps<TType, TInterface>,
+  ): Renderers<T> {
+    return reconsiler(props);
+  }
+}

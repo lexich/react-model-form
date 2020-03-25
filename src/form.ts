@@ -6,14 +6,14 @@ import { getProto } from './proto';
 import { getMetadataField } from './meta';
 import { getInputName } from './helpers';
 
-function createRenderer$<TForm extends SForm, TResolver>(
-  meta: IMetaProps<TForm, TResolver>,
+function createReconsiler<TForm extends SForm, TResolver>(
+  options: IMetaProps<TResolver, any>,
   realPath: string[]
 ): any {
   const handler = {
     get(_: any, method: string) {
       const newRealPath = realPath.concat(method);
-      return createRenderer$<TForm, TResolver>(meta, newRealPath);
+      return createReconsiler<TForm, TResolver>(options, newRealPath);
     }
   };
   if (!realPath) {
@@ -25,22 +25,25 @@ function createRenderer$<TForm extends SForm, TResolver>(
     const isTouched = !!get(model.touched, realPath);
     const name = getInputName(model.form, realPath, model.parentFormName);
     const proto = getProto(model, realPath);
-    const metaInfo = proto ? getMetadataField(proto, propName) : undefined;
-    const error = isTouched ? metaInfo?.validation?.(value) : undefined;
-    const resolverType = metaInfo?.type;
-    const Component = meta.resolveComponent(resolverType);
-    const title = metaInfo?.title;
+    const meta = proto ? getMetadataField(proto, propName) : undefined;
+    const error = isTouched ? meta?.validation?.(value) : undefined;
+    const resolverType = meta?.type;
+    const Component = options.resolveComponent(resolverType);
+    if (!Component) {
+      return null;
+    }
     return React.createElement(Component, {
       model,
-      title,
       name,
       path: realPath,
       value,
-      meta,
+      options,
+      meta: meta as any,
       error,
       type: resolverType,
       isTouched
     });
+
   };
 
   return new Proxy(renderer, handler);
@@ -58,8 +61,8 @@ export function createTouched<T extends SForm>(
   return init ?? ({} as any);
 }
 
-export function createRenderer<T extends SForm, TResolver>(
-  props: IMetaProps<T, TResolver>
+export function reconsiler<T, TType, TInterface>(
+  props: IMetaProps<TType, TInterface>
 ): Renderers<T> {
-  return createRenderer$<T, TResolver>(props, []);
+  return createReconsiler(props, []);
 }

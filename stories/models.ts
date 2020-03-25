@@ -1,32 +1,33 @@
 import { observable } from 'mobx';
-import { SForm, FormModel, field } from '../src';
+import { SForm, FormModel } from '../src';
+import meta, { ERenderer } from './meta';
 
-export enum ERenderer {
-  string,
-  bool,
-  number
-}
+const D = meta.create({
+  form: ERenderer.form,
+  string: ERenderer.string,
+  bool: ERenderer.bool,
+  number: ERenderer.number,
+});
 
-@field({ name: 'money' })
+@D.form({ name: 'money' })
 export class MoneyForm extends SForm {
-  @field({ type: ERenderer.number, title: '*Money' })
+  @D.number({ title: '*Money' })
   @observable
   money = 100;
 
-  @field({ type: ERenderer.string, title: '*Currency' })
+  @D.string({ title: '*Currency' })
   @observable
   currency = '$'
 }
 
-@field({ name: 'form' })
+@D.form({ name: 'form' })
 export class UserForm extends SForm {
-  @field({ type: ERenderer.string, title: '*Name' })
+  @D.string({ title: '*Name' })
   @observable
   name = 'Lexich';
 
-  @field({
+  @D.number({
     title: '*Age',
-    type: ERenderer.number,
     validation(val: number) {
       if (val <= 0) {
         return 'Age should be more zero';
@@ -38,7 +39,7 @@ export class UserForm extends SForm {
   age = 0;
 
   @observable
-  @field({ type: ERenderer.bool, title: '*Are you user?' })
+  @D.bool({ title: '*Are you user?' })
   isUser = true;
 
   purchase = new MoneyForm();
