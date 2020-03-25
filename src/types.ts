@@ -24,7 +24,7 @@ export type TWrapID<T> = T;
 export type TWrapForm<T> = Record<string, T>;
 
 export interface IMetaProps<T, TResolver> {
-  set(target: any, key: string, value: any): void;
+  set(target: any, key: string[], value: any): void;
   resolveComponent(type?: TResolver): FunctionComponent<IProps<any, any>>;
 }
 
@@ -50,7 +50,7 @@ export interface IProps<TValue, TForm> {
   model: FormModel<TForm>;
   value: TValue;
   name: string;
-  path: string;
+  path: string[];
   meta: IMetaProps<TForm, any>;
   type: any;
   title?: string;
@@ -59,7 +59,7 @@ export interface IProps<TValue, TForm> {
 }
 
 export type TReact<T, TForm> = {
-  render(form: FormModel<TForm>): ReactNode;
+  (form: FormModel<TForm>): ReactNode;
 };
 
 export type Renderers<

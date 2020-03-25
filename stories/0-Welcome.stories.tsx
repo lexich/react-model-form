@@ -14,11 +14,11 @@ const TestComponent = observer<{ model: ReturnType<typeof createForm> }>(
   ({ model }) => {
     return (
       <Form>
-        {userRenderer.purchase.money.render(model)}
-        {userRenderer.isUser.render(model)}
-        {userRenderer.age.render(model)}
-        {userRenderer.name.render(model)}
-        {moneyRenderer.currency.render(model.partial('purchase'))}
+        {userRenderer.purchase.money(model)}
+        {userRenderer.isUser(model)}
+        {userRenderer.age(model)}
+        {userRenderer.name(model)}
+        {moneyRenderer.currency(model.partial('purchase'))}
       </Form>
     );
   }
