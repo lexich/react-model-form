@@ -1,5 +1,5 @@
 import React from 'react';
-import { SForm, TReact, Renderers, IMetaProps } from './types';
+import { SForm, TReact, Renderers, IMetaProps, TReactOptions } from './types';
 import { FormModel } from './formModel';
 import get from 'lodash/get';
 import { getProto } from './proto';
@@ -20,11 +20,12 @@ function createReconsiler<TForm extends SForm, TResolver>(
     return new Proxy({}, handler);
   }
   const propName = realPath[realPath.length - 1];
-  const renderer: TReact<any, any> = (model: FormModel<SForm>) => {
+  const renderer: TReact<any> = (model: FormModel<SForm>, opts?: TReactOptions<any>) => {
     const proto = getProto(model.form, realPath);
     const meta = proto ? getMetadataField(proto, propName) : undefined;
     const resolverType = meta?.type;
-    const Component = options.resolveComponent(resolverType);
+    const Component = opts?.Component ?? options.resolveComponent(resolverType);
+
     if (!Component) {
       return null;
     }
@@ -34,7 +35,6 @@ function createReconsiler<TForm extends SForm, TResolver>(
       model,
       name,
       path: realPath,
-
       options,
       meta: meta as any,
       type: resolverType

@@ -44,18 +44,22 @@ type TypeFilterRenderer<
   ? Renderers<TTypeLongName, TOrigin>
   : undefined;
 
-export interface IProps<TForm, TMeta> {
+export interface IPropsBase<TForm> {
   model: FormModel<TForm>;
-
   name: string;
   path: string[];
   type: any;
-  meta: TMeta;
   options: IMetaProps<TForm, any>;
 }
 
-export type TReact<T, TForm> = {
-  (form: FormModel<TForm>): ReactNode;
+export interface IProps<TForm, TMeta> extends IPropsBase<TForm> {
+  meta: TMeta;
+}
+
+export type TReactOptions<T> = { Component: FunctionComponent<IProps<T, any>> };
+
+export type TReact<TForm> = {
+  <T>(form: FormModel<TForm>, options?: TReactOptions<T>): ReactNode;
 };
 
 export type Renderers<
@@ -64,7 +68,7 @@ export type Renderers<
   TKeys extends any = keyof T
 > = RemoveTNullProperties<
   {
-    [P in TKeys]: TypeFilterRenderer<T[P], TOrigin, TReact<T[P], TOrigin>>;
+    [P in TKeys]: TypeFilterRenderer<T[P], TOrigin, TReact<TOrigin>>;
   },
   undefined
 >;
