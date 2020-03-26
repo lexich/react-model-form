@@ -21,11 +21,11 @@ const TestComponent = observer<{
 }>(({ model }) => {
   return (
     <Form>
-      {userRenderer.purchase.money(model)}
       {userRenderer.name(model)}
       {userRenderer.isUser(model)}
       {userRenderer.age(model)}
       {userRenderer.age(model, { Component: AgeStatic })}
+      {userRenderer.purchase.money(model)}
       {userRenderer.purchase.currency(model)}
     </Form>
   );
