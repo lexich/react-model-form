@@ -68,6 +68,6 @@ function resolveComponent(ttype?: ERenderer, _meta?: IFormInputProps) {
   if (!ttype) {
     return null;
   }
-  return InputComponent;
+  return ResolvingComponent;
 }
 ```

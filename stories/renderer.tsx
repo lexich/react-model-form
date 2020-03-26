@@ -100,7 +100,7 @@ const InputComponentData = observer<IProps<UserForm, IFormInputProps>>(
   },
 );
 
-const InputComponent = observer<IProps<UserForm, IFormInputProps>>(props => {
+const ResolvingComponent = observer<IProps<UserForm, IFormInputProps>>(props => {
   const {
     model: { form },
     path,
@@ -124,7 +124,7 @@ const resolveComponent = (ttype?: ERenderer, _meta?: IFormInputProps) => {
   if (!ttype) {
     return null;
   }
-  return InputComponent;
+  return ResolvingComponent;
 };
 
 export const userRenderer = meta.createRender<UserForm>(
