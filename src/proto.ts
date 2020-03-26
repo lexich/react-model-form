@@ -25,13 +25,13 @@ export const getSubProto = (
 };
 
 export function getProto<T extends SForm>(
-  model: FormModel<T>,
+  model: T,
   realPath: string[]
 ): $Proto | undefined {
   const realFormPath =
     realPath.length <= 1 ? [] : realPath.slice(0, realPath.length - 1);
   if (!realFormPath.length) {
-    return model.form as any;
+    return model as any;
   }
-  return get(model.form, realFormPath);
+  return get(model, realFormPath);
 }

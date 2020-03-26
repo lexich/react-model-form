@@ -25,7 +25,7 @@ export type TWrapForm<T> = Record<string, T>;
 
 export interface IMetaProps<TType, TMeta> {
   set(target: any, key: string[], value: any): void;
-  resolveComponent(type?: TType, meta?: TMeta): FunctionComponent<IProps<any, any, TMeta>> | null;
+  resolveComponent(type?: TType, meta?: TMeta): FunctionComponent<IProps<any, TMeta>> | null;
 }
 
 type TypeFilterRenderer<
@@ -44,16 +44,12 @@ type TypeFilterRenderer<
   ? Renderers<TTypeLongName, TOrigin>
   : undefined;
 
-export type TValidation<T> = (val: T) => string | undefined;
-
-export interface IProps<TValue, TForm, TMeta> {
+export interface IProps<TForm, TMeta> {
   model: FormModel<TForm>;
-  value: TValue;
+
   name: string;
   path: string[];
   type: any;
-  isTouched: boolean | undefined;
-  error: string | undefined;
   meta: TMeta;
   options: IMetaProps<TForm, any>;
 }
@@ -98,3 +94,6 @@ export type ClassFlags<
     TypeFilter<T[P], TDefType, ClassFlags<T[P], keyof T[P], TDefType>>
   >;
 };
+
+export type Touched<T> = ClassFlags<T, keyof T, boolean>
+export type Errored<T> = ClassFlags<T, keyof T, string>

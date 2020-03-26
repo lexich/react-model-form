@@ -1,29 +1,23 @@
 import 'reflect-metadata';
-import {
-  TValidation,
-  RemoveTNullProperties,
-  IMetaProps,
-  Renderers
-} from './types';
-import { $Proto, $ProtoForm } from './proto';
-
+import { RemoveTNullProperties, IMetaProps, Renderers, SForm } from './types';
+import { $Proto, $ProtoForm, getProto, getProtoForm } from './proto';
+import get from 'lodash/get';
 const FIELD_PROP = 'fieldprop';
 
 export interface IFieldProps {
   name: string;
   type: any;
-  validation: TValidation<any>;
 }
 
-export const getMetadataField = (
+export const getMetadataField = <T = {}>(
   proto: $Proto,
   propName: string
-): Partial<IFieldProps> | undefined =>
+): (Partial<IFieldProps> & T) | undefined =>
   Reflect.getMetadata(FIELD_PROP, proto as any, propName);
 
-export const getMetadataForm = (
+export const getMetadataForm = <T = {}>(
   proto: $ProtoForm
-): Partial<IFieldProps> | undefined =>
+): (T & Partial<IFieldProps>) | undefined =>
   Reflect.getMetadata(FIELD_PROP, proto as any);
 
 type TFunc<TInterface> = (
@@ -51,7 +45,7 @@ export class Factory<TType, TInterface> {
   }
   createRender<T>(
     reconsiler: (props: IMetaProps<TType, TInterface>) => Renderers<T>,
-    props: IMetaProps<TType, TInterface>,
+    props: IMetaProps<TType, TInterface>
   ): Renderers<T> {
     return reconsiler(props);
   }

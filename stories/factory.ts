@@ -9,6 +9,7 @@ export enum ERenderer {
 
 export interface IFormInputProps {
   title?: string;
+  validation?(val: any): string | undefined | Promise<string | undefined>
 }
 
 export default new Factory<ERenderer, IFormInputProps>();
