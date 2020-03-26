@@ -68,7 +68,7 @@ export type Renderers<
   TKeys extends any = keyof T
 > = RemoveTNullProperties<
   {
-    [P in TKeys]: TypeFilterRenderer<T[P], TOrigin, TReact<TOrigin>>;
+    [P in TKeys]: TypeFilterRenderer<T[P], TOrigin, TReact<TOrigin>> & TReact<TOrigin>;
   },
   undefined
 >;

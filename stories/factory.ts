@@ -4,7 +4,8 @@ export enum ERenderer {
   form,
   string,
   bool,
-  number
+  number,
+  nameField
 }
 
 export interface IFormInputProps {

@@ -2,9 +2,29 @@ import React from 'react';
 import { SForm, TReact, Renderers, IMetaProps, TReactOptions } from './types';
 import { FormModel } from './formModel';
 import get from 'lodash/get';
-import { getProto } from './proto';
-import { getMetadataField } from './meta';
+import { getProto, getProtoForm } from './proto';
+import { getMetadataField, getMetadataForm } from './meta';
 import { getInputName } from './helpers';
+
+const getMetadata = (model: FormModel<SForm>, realPath: string[]) => {
+  // field metadata flow
+  const proto = getProto(model.form, realPath);
+  const propName = realPath[realPath.length - 1];
+  if (!proto) {
+    return undefined;
+  }
+  const meta = getMetadataField(proto, propName);
+  if (meta) {
+    return meta;
+  }
+  const protoClass = getProto(model.form, realPath.concat(undefined!));
+  if (!protoClass) {
+    return undefined;
+  }
+  // class metadata flow
+  const protoForm = getProtoForm(protoClass);
+  return getMetadataForm(protoForm);
+}
 
 function createReconsiler<TForm extends SForm, TResolver>(
   options: IMetaProps<TResolver, any>,
@@ -19,10 +39,9 @@ function createReconsiler<TForm extends SForm, TResolver>(
   if (!realPath) {
     return new Proxy({}, handler);
   }
-  const propName = realPath[realPath.length - 1];
+
   const renderer: TReact<any> = (model: FormModel<SForm>, opts?: TReactOptions<any>) => {
-    const proto = getProto(model.form, realPath);
-    const meta = proto ? getMetadataField(proto, propName) : undefined;
+    const meta = getMetadata(model, realPath);
     const resolverType = meta?.type;
     const Component = opts?.Component ?? options.resolveComponent(resolverType);
 

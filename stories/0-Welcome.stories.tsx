@@ -22,10 +22,10 @@ const TestComponent = observer<{
   return (
     <Form>
       {userRenderer.purchase.money(model)}
+      {userRenderer.name(model)}
       {userRenderer.isUser(model)}
       {userRenderer.age(model)}
       {userRenderer.age(model, { Component: AgeStatic })}
-      {userRenderer.name(model)}
       {moneyRenderer.currency(model.partial('purchase'))}
     </Form>
   );

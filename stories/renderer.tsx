@@ -10,13 +10,47 @@ import 'antd/dist/antd.css';
 import meta, { ERenderer, IFormInputProps } from './factory';
 import { IProps, reconsiler } from '../src';
 
-import { UserForm, MoneyForm } from './models';
+import { UserForm, MoneyForm, NameForm } from './models';
 
 const InputComponentData = observer<IProps<UserForm, IFormInputProps>>(
   ({ model, options, name, path, type }) => {
     const touched = model.form.validation.touched;
     const value = get(model.form, path);
     switch (type) {
+      case ERenderer.nameField: {
+        const form: NameForm = value;
+        const pathFirstName = path.concat('firstName');
+        const pathLastName = path.concat('lastName');
+        return (
+          <p>
+            <Input
+              key={`${name}.firstName`}
+              value={form.firstName}
+              name={`${name}.firstName`}
+              onChange={(e: any) => form.firstName = e.target.value}
+              onFocus={() => {
+                options.set(touched, pathFirstName, false);
+              }}
+              onBlur={() => {
+                options.set(touched, pathFirstName, true);
+              }}
+            />
+
+            <Input
+              key={`${name}.lastName`}
+              value={form.lastName}
+              name={`${name}.lastName`}
+              onChange={(e: any) => form.lastName = e.target.value}
+              onFocus={() => {
+                options.set(touched, pathLastName, false);
+              }}
+              onBlur={() => {
+                options.set(touched, pathLastName, true);
+              }}
+            />
+          </p>
+        );
+      }
       case ERenderer.bool:
         return (
           <Checkbox
