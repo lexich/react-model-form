@@ -39,8 +39,9 @@ function createReconsiler<TForm extends SForm, TResolver>(
     return new Proxy({}, handler);
   }
 
-  const renderer: TReact<any> = (model: FormModel<SForm>, opts?: TReactOptions<any>) => {
-    const meta = getMetadata(model, realPath);
+  const renderer: TReact<any, any> = (model: FormModel<SForm>, opts?: TReactOptions<any, any>) => {
+    const fieldMeta = getMetadata(model, realPath);
+    const meta = { ...fieldMeta, ...opts?.meta };
     const resolverType = meta?.type;
     const Component = opts?.Component ?? options.resolveComponent(resolverType);
 
@@ -64,6 +65,6 @@ function createReconsiler<TForm extends SForm, TResolver>(
 
 export function reconsiler<T, TType, TInterface>(
   props: IMetaProps<TType, TInterface>,
-): Renderers<T> {
+): Renderers<T, TInterface> {
   return createReconsiler(props, []);
 }

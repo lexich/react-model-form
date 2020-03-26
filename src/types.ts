@@ -6,6 +6,11 @@ export abstract class SForm {
   [formSymbol]() {}
 }
 
+export interface IFieldProps {
+  name: string;
+  type: any;
+}
+
 export type SFormKeys<T> = RemoveTNullProperties<
   {
     [P in keyof T]: T[P] extends SForm ? T[P] : undefined;
@@ -30,6 +35,7 @@ export interface IMetaProps<TType, TMeta> {
 
 type TypeFilterRenderer<
   TTypeLongName,
+  TInterface,
   TOrigin,
   TLeftType = TTypeLongName
 > = TTypeLongName extends string
@@ -41,7 +47,7 @@ type TypeFilterRenderer<
   : TTypeLongName extends Date
   ? TLeftType
   : TTypeLongName extends SForm
-  ? Renderers<TTypeLongName, TOrigin>
+  ? Renderers<TTypeLongName, TInterface, TOrigin>
   : undefined;
 
 export interface IPropsBase<TForm> {
@@ -56,19 +62,24 @@ export interface IProps<TForm, TMeta> extends IPropsBase<TForm> {
   meta: TMeta;
 }
 
-export type TReactOptions<T> = { Component: FunctionComponent<IProps<T, any>> };
+export type TReactOptions<T, TMeta> = {
+  Component?: FunctionComponent<IProps<T, any>>;
+  meta?: TMeta;
+};
 
-export type TReact<TForm> = {
-  <T>(form: FormModel<TForm>, options?: TReactOptions<T>): ReactNode;
+export type TReact<TForm, TInterface> = {
+  <T>(form: FormModel<TForm>, options?: TReactOptions<T, TInterface>): ReactNode;
 };
 
 export type Renderers<
   T extends any,
+  TInterface,
   TOrigin = T,
   TKeys extends any = keyof T
 > = RemoveTNullProperties<
   {
-    [P in TKeys]: TypeFilterRenderer<T[P], TOrigin, TReact<TOrigin>> & TReact<TOrigin>;
+    [P in TKeys]: TypeFilterRenderer<T[P], TInterface, TOrigin, TReact<TOrigin, TInterface>> &
+      TReact<TOrigin, TInterface>;
   },
   undefined
 >;

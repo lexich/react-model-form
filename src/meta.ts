@@ -1,12 +1,7 @@
 import 'reflect-metadata';
-import { RemoveTNullProperties, IMetaProps, Renderers } from './types';
+import { RemoveTNullProperties, IMetaProps, Renderers, IFieldProps } from './types';
 import { $Proto, $ProtoForm } from './proto';
 const FIELD_PROP = 'fieldprop';
-
-export interface IFieldProps {
-  name: string;
-  type: any;
-}
 
 export const getMetadataField = <T = {}>(
   proto: $Proto,
@@ -40,9 +35,9 @@ export class Factory<TType, TInterface> {
     }, {} as any);
   }
   createRender<T>(
-    reconsiler: (props: IMetaProps<TType, TInterface>) => Renderers<T>,
+    reconsiler: (props: IMetaProps<TType, TInterface>) => Renderers<T, TInterface>,
     props: IMetaProps<TType, TInterface>,
-  ): Renderers<T> {
+  ): Renderers<T, TInterface> {
     return reconsiler(props);
   }
 }

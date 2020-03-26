@@ -15,7 +15,9 @@
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
     "prettier": "prettier --write src stories",
-    "build": "rm -rf lib && tsc --build tsconfig.build.json"
+    "build": "rm -rf lib && tsc --build tsconfig.build.json",
+    "release": "npm run build && npm run release:flow",
+    "release:flow": "standard-version --no-verify; git push --follow-tags origin master; npm publish"
   },
   "dependencies": {
     "@types/events": "^3.0.0",
@@ -43,6 +45,7 @@
     "mobx-react-lite": "^1.5.2",
     "prettier": "^2.0.2",
     "react-docgen-typescript-loader": "^3.7.1",
+    "standard-version": "^7.1.0",
     "storybook": "^5.3.17",
     "style-loader": "^1.1.3",
     "ts-jest": "^25.2.1",
