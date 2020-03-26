@@ -5,12 +5,12 @@ export enum ERenderer {
   string,
   bool,
   number,
-  nameField
+  nameField,
 }
 
 export interface IFormInputProps {
   title?: string;
-  validation?(val: any): string | undefined | Promise<string | undefined>
+  validation?(val: any): string | undefined | Promise<string | undefined>;
 }
 
 export default new Factory<ERenderer, IFormInputProps>();

@@ -9,12 +9,12 @@ import get from 'lodash/get';
 
 export default {
   title: 'Welcome',
-  component: Welcome
+  component: Welcome,
 };
 
-const AgeStatic = observer<IProps<any, any>>(({ model, path }) =>
+const AgeStatic = observer<IProps<any, any>>(({ model, path }) => (
   <div>Age: {get(model.form, path)}</div>
-);
+));
 
 const TestComponent = observer<{
   model: ReturnType<typeof createForm>;

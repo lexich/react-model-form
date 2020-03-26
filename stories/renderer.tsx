@@ -26,7 +26,7 @@ const InputComponentData = observer<IProps<UserForm, IFormInputProps>>(
               key={`${name}.firstName`}
               value={form.firstName}
               name={`${name}.firstName`}
-              onChange={(e: any) => form.firstName = e.target.value}
+              onChange={(e: any) => (form.firstName = e.target.value)}
               onFocus={() => {
                 options.set(touched, pathFirstName, false);
               }}
@@ -39,7 +39,7 @@ const InputComponentData = observer<IProps<UserForm, IFormInputProps>>(
               key={`${name}.lastName`}
               value={form.lastName}
               name={`${name}.lastName`}
-              onChange={(e: any) => form.lastName = e.target.value}
+              onChange={(e: any) => (form.lastName = e.target.value)}
               onFocus={() => {
                 options.set(touched, pathLastName, false);
               }}
@@ -97,13 +97,13 @@ const InputComponentData = observer<IProps<UserForm, IFormInputProps>>(
           />
         );
     }
-  }
+  },
 );
 
 const InputComponent = observer<IProps<UserForm, IFormInputProps>>(props => {
   const {
     model: { form },
-    path
+    path,
   } = props;
   const value = get(form, path);
   const error = form.validation.getError(value, path);
@@ -112,7 +112,7 @@ const InputComponent = observer<IProps<UserForm, IFormInputProps>>(props => {
       label={props.meta.title || props.name}
       help={error}
       style={{
-        backgroundColor: form.validation.isTouched(path) ? '#ddd' : 'auto'
+        backgroundColor: form.validation.isTouched(path) ? '#ddd' : 'auto',
       }}
     >
       <InputComponentData {...props} />
@@ -131,6 +131,6 @@ export const userRenderer = meta.createRender<UserForm>(
   props => reconsiler<UserForm, ERenderer, IFormInputProps>(props),
   {
     set,
-    resolveComponent
-  }
+    resolveComponent,
+  },
 );

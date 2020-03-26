@@ -15,14 +15,14 @@ const D = meta.create({
 export class MoneyForm extends SForm {
   @D.number({
     title: '*Money',
-    validation(val: number): Promise<string| undefined> {
+    validation(val: number): Promise<string | undefined> {
       return new Promise(resolve => setTimeout(resolve, 10)).then(() => {
         if (val < 100) {
           return 'Not enougth money';
         }
         return undefined;
       });
-    }
+    },
   })
   @observable
   money = 100;
@@ -55,7 +55,7 @@ export class UserForm extends SForm {
         return 'Age should be more zero';
       }
       return undefined;
-    }
+    },
   })
   @observable
   age = 0;
@@ -70,7 +70,7 @@ export class UserForm extends SForm {
   validation = new Validation<UserForm>(this);
 }
 
-export default function() {
+export default function () {
   const user = new UserForm();
   return new FormModel(user);
 }

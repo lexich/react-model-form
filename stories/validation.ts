@@ -3,10 +3,7 @@ import { observable } from 'mobx';
 import { IFormInputProps } from './factory';
 import { get, set } from 'lodash';
 
-export default class ValidationImpl<T extends SForm> extends Validation<
-  T,
-  ValidationImpl<T>
-> {
+export default class ValidationImpl<T extends SForm> extends Validation<T, ValidationImpl<T>> {
   @observable.deep touched: Touched<T> = {} as any;
   @observable.deep error: Errored<T> = {} as any;
 
@@ -29,7 +26,7 @@ export default class ValidationImpl<T extends SForm> extends Validation<
     } else {
       result.then(
         res => set(this.error, path, res),
-        (err: Error) => set(this.error, path, err.message)
+        (err: Error) => set(this.error, path, err.message),
       );
       return get(this.error, path);
     }
