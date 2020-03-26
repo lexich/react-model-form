@@ -19,10 +19,7 @@ export abstract class Validation<TForm, TInstance> {
     return isTouched ? this.getErrorMessage(val, path) : undefined;
   }
 
-  protected getFieldMetadata<TForm extends SForm, TMeta>(
-    form: TForm,
-    path: string[]
-  ) {
+  protected getFieldMetadata<TForm extends SForm, TMeta>(form: TForm, path: string[]) {
     const proto = getProto(form, path);
     if (!proto) {
       return;

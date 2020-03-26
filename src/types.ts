@@ -89,15 +89,9 @@ export type TypeFilter<
   ? TLeftType
   : TRightType;
 
-export type ClassFlags<
-  T extends any,
-  TKeys extends any = keyof T,
-  TDefType = boolean
-> = {
-  [P in TKeys]: Partial<
-    TypeFilter<T[P], TDefType, ClassFlags<T[P], keyof T[P], TDefType>>
-  >;
+export type ClassFlags<T extends any, TKeys extends any = keyof T, TDefType = boolean> = {
+  [P in TKeys]: Partial<TypeFilter<T[P], TDefType, ClassFlags<T[P], keyof T[P], TDefType>>>;
 };
 
-export type Touched<T> = ClassFlags<T, keyof T, boolean>
-export type Errored<T> = ClassFlags<T, keyof T, string>
+export type Touched<T> = ClassFlags<T, keyof T, boolean>;
+export type Errored<T> = ClassFlags<T, keyof T, string>;

@@ -1,7 +1,6 @@
 import 'reflect-metadata';
-import { RemoveTNullProperties, IMetaProps, Renderers, SForm } from './types';
-import { $Proto, $ProtoForm, getProto, getProtoForm } from './proto';
-import get from 'lodash/get';
+import { RemoveTNullProperties, IMetaProps, Renderers } from './types';
+import { $Proto, $ProtoForm } from './proto';
 const FIELD_PROP = 'fieldprop';
 
 export interface IFieldProps {
@@ -11,17 +10,16 @@ export interface IFieldProps {
 
 export const getMetadataField = <T = {}>(
   proto: $Proto,
-  propName: string
+  propName: string,
 ): (Partial<IFieldProps> & T) | undefined =>
   Reflect.getMetadata(FIELD_PROP, proto as any, propName);
 
 export const getMetadataForm = <T = {}>(
-  proto: $ProtoForm
-): (T & Partial<IFieldProps>) | undefined =>
-  Reflect.getMetadata(FIELD_PROP, proto as any);
+  proto: $ProtoForm,
+): (T & Partial<IFieldProps>) | undefined => Reflect.getMetadata(FIELD_PROP, proto as any);
 
 type TFunc<TInterface> = (
-  opts: Partial<IFieldProps> & TInterface
+  opts: Partial<IFieldProps> & TInterface,
 ) => {
   (target: Function): void;
   (target: Object, propertyKey: string | symbol): void;
@@ -29,9 +27,7 @@ type TFunc<TInterface> = (
 
 export type TWrap<TType, TInterface, TSchema> = RemoveTNullProperties<
   {
-    [K in keyof TSchema]: TSchema[K] extends TType
-      ? TFunc<TInterface>
-      : undefined;
+    [K in keyof TSchema]: TSchema[K] extends TType ? TFunc<TInterface> : undefined;
   }
 >;
 
@@ -45,7 +41,7 @@ export class Factory<TType, TInterface> {
   }
   createRender<T>(
     reconsiler: (props: IMetaProps<TType, TInterface>) => Renderers<T>,
-    props: IMetaProps<TType, TInterface>
+    props: IMetaProps<TType, TInterface>,
   ): Renderers<T> {
     return reconsiler(props);
   }

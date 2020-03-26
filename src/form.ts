@@ -1,7 +1,6 @@
 import React from 'react';
 import { SForm, TReact, Renderers, IMetaProps, TReactOptions } from './types';
 import { FormModel } from './formModel';
-import get from 'lodash/get';
 import { getProto, getProtoForm } from './proto';
 import { getMetadataField, getMetadataForm } from './meta';
 import { getInputName } from './helpers';
@@ -24,17 +23,17 @@ const getMetadata = (model: FormModel<SForm>, realPath: string[]) => {
   // class metadata flow
   const protoForm = getProtoForm(protoClass);
   return getMetadataForm(protoForm);
-}
+};
 
 function createReconsiler<TForm extends SForm, TResolver>(
   options: IMetaProps<TResolver, any>,
-  realPath: string[]
+  realPath: string[],
 ): any {
   const handler = {
     get(_: any, method: string) {
       const newRealPath = realPath.concat(method);
       return createReconsiler<TForm, TResolver>(options, newRealPath);
-    }
+    },
   };
   if (!realPath) {
     return new Proxy({}, handler);
@@ -56,7 +55,7 @@ function createReconsiler<TForm extends SForm, TResolver>(
       path: realPath,
       options,
       meta: meta as any,
-      type: resolverType
+      type: resolverType,
     });
   };
 
@@ -64,7 +63,7 @@ function createReconsiler<TForm extends SForm, TResolver>(
 }
 
 export function reconsiler<T, TType, TInterface>(
-  props: IMetaProps<TType, TInterface>
+  props: IMetaProps<TType, TInterface>,
 ): Renderers<T> {
   return createReconsiler(props, []);
 }
