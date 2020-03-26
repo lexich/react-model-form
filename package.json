@@ -4,6 +4,13 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
+  "description": "Render models as react components",
+  "repository": "http://github.com/lexich/react-model-renderer",
+  "author": {
+    "name": "Efremov Alex",
+    "email": "lexich121@gmail.com",
+    "url": "https://github.com/lexich"
+  },
   "scripts": {
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
