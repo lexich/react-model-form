@@ -1,4 +1,3 @@
-import { FunctionComponent } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Checkbox, InputNumber, Input, Form } from 'antd';
 import React from 'react';
@@ -130,14 +129,6 @@ const resolveComponent = (ttype?: ERenderer, _meta?: IFormInputProps) => {
 
 export const userRenderer = meta.createRender<UserForm>(
   props => reconsiler<UserForm, ERenderer, IFormInputProps>(props),
-  {
-    set,
-    resolveComponent
-  }
-);
-
-export const moneyRenderer = meta.createRender<MoneyForm>(
-  props => reconsiler<MoneyForm, ERenderer, IFormInputProps>(props),
   {
     set,
     resolveComponent

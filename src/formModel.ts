@@ -6,7 +6,9 @@ export class FormModel<TForm> {
     public form: TForm,
     public parentFormName = ''
   ) {}
-  partial<TField extends keyof SFormKeys<TForm>>(
+
+  // Work in Progress
+  private partial<TField extends keyof SFormKeys<TForm>>(
     field: TField
   ): FormModel<TForm[typeof field]> {
     const model = this.form[field];

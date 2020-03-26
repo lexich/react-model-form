@@ -2,7 +2,7 @@ import React from 'react';
 import { Welcome } from '@storybook/react/demo';
 import { Form } from 'antd';
 import createForm from './models';
-import { moneyRenderer, userRenderer } from './renderer';
+import { userRenderer } from './renderer';
 import { observer } from 'mobx-react-lite';
 import { IProps } from 'src';
 import get from 'lodash/get';
@@ -26,7 +26,7 @@ const TestComponent = observer<{
       {userRenderer.isUser(model)}
       {userRenderer.age(model)}
       {userRenderer.age(model, { Component: AgeStatic })}
-      {moneyRenderer.currency(model.partial('purchase'))}
+      {userRenderer.purchase.currency(model)}
     </Form>
   );
 });
