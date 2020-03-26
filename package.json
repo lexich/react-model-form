@@ -1,9 +1,17 @@
 {
   "name": "form",
-  "version": "1.0.0",
-  "main": "index.js",
+  "version": "0.0.1",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
   "license": "MIT",
+  "scripts": {
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook",
+    "prettier": "prettier --write src stories",
+    "build": "rm -rf lib && tsc --build tsconfig.build.json"
+  },
   "dependencies": {
+    "@types/events": "^3.0.0",
     "@types/lodash": "^4.14.149",
     "@types/react": "^16.9.25",
     "@types/react-dom": "^16.9.5",
@@ -33,10 +41,5 @@
     "ts-jest": "^25.2.1",
     "ts-loader": "^6.2.2",
     "typescript": "^3.8.3"
-  },
-  "scripts": {
-    "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook",
-    "prettier": "prettier --write src stories"
   }
 }

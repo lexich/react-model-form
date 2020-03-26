@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
       "strict": true,
-      "declaration": false,
+      "declaration": true,
       "emitDecoratorMetadata": true,
       "experimentalDecorators": true,
       "allowSyntheticDefaultImports": true,
@@ -15,7 +15,7 @@
       "baseUrl": "./",
       "outDir": "./lib"
     },
-    "include": ["src/**/*", "stories/**/*"],
-    "exclude": ["node_modules", "build", "scripts"],
+    "include": ["src/**/*"],
+    "exclude": ["node_modules", "build", "scripts", "stories"],
     "compileOnSave": false
   }
