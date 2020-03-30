@@ -5,7 +5,7 @@ import { getProto, getProtoForm } from './proto';
 import { getMetadataField, getMetadataForm } from './meta';
 import { getInputName } from './helpers';
 
-const getMetadata = (model: FormModel<SForm>, realPath: string[]) => {
+export const getMetadata = (model: FormModel<SForm>, realPath: string[]) => {
   // field metadata flow
   const proto = getProto(model.form, realPath);
   const propName = realPath[realPath.length - 1];

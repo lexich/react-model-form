@@ -12,6 +12,7 @@
     "url": "https://github.com/lexich"
   },
   "scripts": {
+    "test": "jest src",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
     "prettier": "prettier --write src stories",
