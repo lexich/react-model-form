@@ -6,16 +6,17 @@ import get from 'lodash/get';
 
 import 'antd/dist/antd.css';
 
-import meta, { ERenderer, IFormInputProps } from './factory';
+import meta, { ERenderer } from './factory';
 import { IProps, reconsiler } from '../src';
 
-import { UserForm, MoneyForm, NameForm } from './models';
+import { UserForm, MoneyForm, NameForm, DTypes } from './models';
 
-const InputComponentData = observer<IProps<UserForm, IFormInputProps>>(
-  ({ model, options, name, path, type }) => {
+const InputComponentData = observer<IProps<UserForm>>(
+  ({ model, options, name, path, meta }) => {
     const touched = model.form.validation.touched;
     const value = get(model.form, path);
-    switch (type) {
+    const metaData: DTypes = meta;
+    switch (metaData.type) {
       case ERenderer.nameField: {
         const form: NameForm = value;
         const pathFirstName = path.concat('firstName');
@@ -100,7 +101,7 @@ const InputComponentData = observer<IProps<UserForm, IFormInputProps>>(
   },
 );
 
-const ResolvingComponent = observer<IProps<UserForm, IFormInputProps>>(props => {
+const ResolvingComponent = observer<IProps<UserForm>>(props => {
   const {
     model: { form },
     path,
@@ -120,7 +121,7 @@ const ResolvingComponent = observer<IProps<UserForm, IFormInputProps>>(props => 
   );
 });
 
-const resolveComponent = (ttype?: ERenderer, _meta?: IFormInputProps) => {
+const resolveComponent = (ttype?: ERenderer) => {
   if (!ttype) {
     return null;
   }
@@ -128,7 +129,7 @@ const resolveComponent = (ttype?: ERenderer, _meta?: IFormInputProps) => {
 };
 
 export const userRenderer = meta.createRender<UserForm>(
-  props => reconsiler<UserForm, ERenderer, IFormInputProps>(props),
+  props => reconsiler<UserForm, ERenderer>(props),
   {
     set,
     resolveComponent,

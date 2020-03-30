@@ -28,14 +28,13 @@ export type RemoveTNullProperties<Type, TNull = undefined> = {
 export type TWrapID<T> = T;
 export type TWrapForm<T> = Record<string, T>;
 
-export interface IMetaProps<TType, TMeta> {
+export interface IMetaProps<TType> {
   set(target: any, key: string[], value: any): void;
-  resolveComponent(type?: TType, meta?: TMeta): FunctionComponent<IProps<any, TMeta>> | null;
+  resolveComponent(type?: TType, meta?: any): FunctionComponent<IProps<any>> | null;
 }
 
 type TypeFilterRenderer<
   TTypeLongName,
-  TInterface,
   TOrigin,
   TLeftType = TTypeLongName
 > = TTypeLongName extends string
@@ -47,42 +46,36 @@ type TypeFilterRenderer<
   : TTypeLongName extends Date
   ? TLeftType
   : TTypeLongName extends SForm
-  ? Renderers<TTypeLongName, TInterface, TOrigin>
+  ? Renderers<TTypeLongName, TOrigin>
   : undefined;
-
-export interface IPropsBase<TForm> {
-  model: FormModel<TForm>;
-  name: string;
-  path: string[];
-  type: any;
-  options: IMetaProps<TForm, any>;
-}
-
-export interface IProps<TForm, TMeta> extends IPropsBase<TForm> {
-  meta: TMeta;
-}
-
-export type TReactOptions<T, TMeta> = {
-  Component?: FunctionComponent<IProps<T, any>>;
-  meta?: TMeta;
-};
-
-export type TReact<TForm, TInterface> = {
-  <T>(form: FormModel<TForm>, options?: TReactOptions<T, TInterface>): ReactNode;
-};
 
 export type Renderers<
   T extends any,
-  TInterface,
   TOrigin = T,
   TKeys extends any = keyof T
 > = RemoveTNullProperties<
   {
-    [P in TKeys]: TypeFilterRenderer<T[P], TInterface, TOrigin, TReact<TOrigin, TInterface>> &
-      TReact<TOrigin, TInterface>;
+    [P in TKeys]: TypeFilterRenderer<T[P], TOrigin, TReact<TOrigin>> & TReact<TOrigin>;
   },
   undefined
 >;
+
+export interface IProps<TForm> {
+  model: FormModel<TForm>;
+  name: string;
+  path: string[];
+  options: IMetaProps<TForm>;
+  meta: any;
+}
+
+export type TReactOptions<T> = {
+  Component?: FunctionComponent<IProps<T>>;
+  meta?: any;
+};
+
+export type TReact<TForm> = {
+  <T>(form: FormModel<TForm>, options?: TReactOptions<T>): ReactNode;
+};
 
 export type TypeFilter<
   TTypeLongName,

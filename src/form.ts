@@ -26,7 +26,7 @@ export const getMetadata = (model: FormModel<SForm>, realPath: string[]) => {
 };
 
 function createReconsiler<TForm extends SForm, TResolver>(
-  options: IMetaProps<TResolver, any>,
+  options: IMetaProps<TResolver>,
   realPath: string[],
 ): any {
   const handler = {
@@ -39,11 +39,10 @@ function createReconsiler<TForm extends SForm, TResolver>(
     return new Proxy({}, handler);
   }
 
-  const renderer: TReact<any, any> = (model: FormModel<SForm>, opts?: TReactOptions<any, any>) => {
+  const renderer: TReact<any> = (model: FormModel<SForm>, opts?: TReactOptions<any>) => {
     const fieldMeta = getMetadata(model, realPath);
     const meta = { ...fieldMeta, ...opts?.meta };
-    const resolverType = meta?.type;
-    const Component = opts?.Component ?? options.resolveComponent(resolverType);
+    const Component = opts?.Component ?? options.resolveComponent(meta?.type);
 
     if (!Component) {
       return null;
@@ -55,16 +54,15 @@ function createReconsiler<TForm extends SForm, TResolver>(
       name,
       path: realPath,
       options,
-      meta: meta as any,
-      type: resolverType,
+      meta: meta as any
     });
   };
 
   return new Proxy(renderer, handler);
 }
 
-export function reconsiler<T, TType, TInterface>(
-  props: IMetaProps<TType, TInterface>,
-): Renderers<T, TInterface> {
+export function reconsiler<T, TType>(
+  props: IMetaProps<TType>,
+): Renderers<T> {
   return createReconsiler(props, []);
 }

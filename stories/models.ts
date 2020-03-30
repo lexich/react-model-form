@@ -3,13 +3,40 @@ import { SForm, FormModel } from '../src';
 import meta, { ERenderer } from './factory';
 import Validation from './validation';
 
-const D = meta.create({
-  form: ERenderer.form,
-  string: ERenderer.string,
-  bool: ERenderer.bool,
-  number: ERenderer.number,
-  nameField: ERenderer.nameField,
-});
+const D = {
+  form: meta.createDecorator<ERenderer.form, {}>(ERenderer.form),
+  string: meta.createDecorator<
+    ERenderer.string,
+    {
+      title?: string;
+    }
+  >(ERenderer.string),
+  bool: meta.createDecorator<
+    ERenderer.bool,
+    {
+      title?: string;
+    }
+  >(ERenderer.bool),
+  number: meta.createDecorator<
+    ERenderer.number,
+    {
+      title?: string;
+      validation?(val: any): string | undefined | Promise<string | undefined>;
+    }
+  >(ERenderer.number),
+  nameField: meta.createDecorator<
+    ERenderer.nameField,
+    {
+      title: string;
+    }
+  >(ERenderer.nameField),
+};
+
+export type DTypes =
+  | typeof D.form['$$type']
+  | typeof D.string['$$type']
+  | typeof D.bool['$$type']
+  | (typeof D.number['$$type'] | typeof D.nameField['$$type']);
 
 @D.form({ name: 'money' })
 export class MoneyForm extends SForm {

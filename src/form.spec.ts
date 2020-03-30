@@ -5,11 +5,12 @@ enum ERenderer {
   test2,
 }
 
-const factory = new Factory<ERenderer, {}>();
-const D = factory.create({
-  test1: ERenderer.test1,
-  test2: ERenderer.test2,
-});
+const factory = new Factory<ERenderer>();
+
+const D = {
+  test1: factory.createDecorator<ERenderer.test1, {}>(ERenderer.test1),
+  test2: factory.createDecorator<ERenderer.test2, {}>(ERenderer.test2)
+};
 
 describe('form', () => {
   describe('getMetadata', () => {

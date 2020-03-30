@@ -12,7 +12,7 @@ export default {
   component: Welcome,
 };
 
-const AgeStatic = observer<IProps<any, any>>(({ model, path }) => (
+const AgeStatic = observer<IProps<any>>(({ model, path }) => (
   <div>Age: {get(model.form, path)}</div>
 ));
 

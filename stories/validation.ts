@@ -1,7 +1,7 @@
 import { SForm, Validation, Touched, Errored } from '../src';
 import { observable } from 'mobx';
-import { IFormInputProps } from './factory';
 import { get, set } from 'lodash';
+import { DTypes } from './models';
 
 export default class ValidationImpl<T extends SForm> extends Validation<T, ValidationImpl<T>> {
   @observable.deep touched: Touched<T> = {} as any;
@@ -12,7 +12,8 @@ export default class ValidationImpl<T extends SForm> extends Validation<T, Valid
   }
 
   getErrorMessage(value: any, path: string[]): string | undefined {
-    const meta = this.getFieldMetadata<T, IFormInputProps>(this.form, path);
+    const meta: any = this.getFieldMetadata<T, DTypes>(this.form, path);
+
     const validation = meta?.validation;
     if (!validation) {
       return undefined;
@@ -25,7 +26,7 @@ export default class ValidationImpl<T extends SForm> extends Validation<T, Valid
       return result;
     } else {
       result.then(
-        res => set(this.error, path, res),
+        (res: any) => set(this.error, path, res),
         (err: Error) => set(this.error, path, err.message),
       );
       return get(this.error, path);

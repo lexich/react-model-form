@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { RemoveTNullProperties, IMetaProps, Renderers, IFieldProps } from './types';
+import { IMetaProps, Renderers, IFieldProps } from './types';
 import { $Proto, $ProtoForm } from './proto';
 const FIELD_PROP = 'fieldprop';
 
@@ -13,31 +13,25 @@ export const getMetadataForm = <T = {}>(
   proto: $ProtoForm,
 ): (T & Partial<IFieldProps>) | undefined => Reflect.getMetadata(FIELD_PROP, proto as any);
 
-type TFunc<TInterface> = (
-  opts: Partial<IFieldProps> & TInterface,
+type TDecorator<TInterface> = (
+  _: Partial<IFieldProps> & Omit<TInterface, 'type'>,
 ) => {
   (target: Function): void;
   (target: Object, propertyKey: string | symbol): void;
 };
 
-export type TWrap<TType, TInterface, TSchema> = RemoveTNullProperties<
-  {
-    [K in keyof TSchema]: TSchema[K] extends TType ? TFunc<TInterface> : undefined;
-  }
->;
-
-export class Factory<TType, TInterface> {
-  create<TSchema>(schema: TSchema): TWrap<TType, TInterface, TSchema> {
-    return Object.keys(schema).reduce((memo, key) => {
-      memo[key] = (opts: any) =>
-        Reflect.metadata(FIELD_PROP, { ...opts, type: (schema as any)[key] });
-      return memo;
-    }, {} as any);
+export class Factory<TType$> {
+  createDecorator<TType extends TType$, TInterface>(
+    ttype: TType,
+  ): TDecorator<TInterface> & { $$type: { type: TType } & TInterface } {
+    const fn: TDecorator<TInterface> = (opts: Partial<IFieldProps> & Omit<TInterface, 'type'>) =>
+      Reflect.metadata(FIELD_PROP, { ...opts, type: ttype });
+    return fn as any;
   }
   createRender<T>(
-    reconsiler: (props: IMetaProps<TType, TInterface>) => Renderers<T, TInterface>,
-    props: IMetaProps<TType, TInterface>,
-  ): Renderers<T, TInterface> {
+    reconsiler: (props: IMetaProps<TType$>) => Renderers<T>,
+    props: IMetaProps<TType$>,
+  ): Renderers<T> {
     return reconsiler(props);
   }
 }
